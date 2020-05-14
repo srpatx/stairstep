@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "open3"
+require "stringio"
 require_relative "../stairstep"
 
 class Stairstep::CommandExecutor
@@ -13,7 +14,7 @@ class Stairstep::CommandExecutor
     Open3.public_send(method, *command) do |_stdin, stdout, thread|
       while (line = stdout.gets)
         print(".") if progress
-        output.puts(line)
+        output&.puts(line)
       end
       puts if progress
 
@@ -23,6 +24,25 @@ class Stairstep::CommandExecutor
 
   def execute!(*command, **options)
     raise "Command failed: `#{command.join(' ')}`" unless execute(*command, **options)
+  end
+
+  def fetch_stdout(exec, *command, **options)
+    io = StringIO.new
+    __send__(exec, *command, **options.merge(output: io, stdout_only: true))
+    io.rewind
+    io.read
+  end
+
+  def git(*command, **options)
+    execute!("git", *command, **options)
+  end
+
+  def heroku(remote, *command, **options)
+    execute!("heroku", *command, "--remote", remote, **options)
+  end
+
+  def heroku_api(method, path, **options)
+    execute!("heroku", "api", method, path, **options)
   end
 end
 
