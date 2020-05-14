@@ -1,0 +1,26 @@
+inherit_gem:
+  groundwork-style:
+    - rubocop.yml
+    - rubocop_performance.yml
+    - rubocop_rake.yml
+    - rubocop_rspec.yml
+    - rubocop_i18n.yml
+
+AllCops:
+  TargetRubyVersion: 2.7
+  Exclude:
+    - bin/**/*
+
+Metrics/MethodLength:
+  Enabled: false
+
+# Lots of spec examples break across multiple lines.
+Style/MethodCallWithArgsParentheses:
+  Exclude:
+    - spec/**/*
+    - Gemfile
+    - Rakefile
+
+RSpec/NamedSubject:
+  Enabled: false
+
