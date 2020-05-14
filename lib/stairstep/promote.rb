@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require "date"
-require "json"
 require_relative "../stairstep"
 require_relative "../stairstep/command_executor"
+require_relative "../stairstep/common/heroku"
 
 # rubocop:disable Metrics/ClassLength
 class Stairstep::Promote
@@ -11,12 +11,12 @@ class Stairstep::Promote
     @to_remote = to_remote
     process_options(options)
 
-    verify_pipeline
+    heroku.verify_pipeline(pipeline)
     verify_remotes
     verify_applications
-    capture_db if capture_db?
+    heroku.capture_db(to_remote) if capture_db?
 
-    with_tag { promote_slug }
+    promote_slug
 
     info("Success!")
   end
@@ -37,10 +37,6 @@ class Stairstep::Promote
     @pipeline ||= File.basename(fetch_stdout(:git, "rev-parse", "--show-toplevel")).rstrip
   end
 
-  def verify_pipeline
-    execute("heroku", "pipelines:info", pipeline, output: nil)
-  end
-
   def verify_remotes
     error("Unknown remote to promote from") unless from_remote
   end
@@ -59,21 +55,8 @@ class Stairstep::Promote
   # rubocop:enable Style/MissingElse
 
   def verify_applications
-    verify_application(from_remote)
-    verify_application(to_remote)
-  end
-
-  def verify_application(remote)
-    heroku(remote, "apps:info", output: nil)
-  rescue
-    error("Cannot access Heroku application at remote '#{remote}'")
-  end
-
-  def capture_db
-    heroku(to_remote, "pg:backups", "capture")
-  rescue Exception # rubocop:disable Lint/RescueException
-    heroku(to_remote, "pg:backups", "cancel")
-    raise
+    heroku.verify_application(from_remote)
+    heroku.verify_application(to_remote)
   end
 
   def with_tag
@@ -111,66 +94,29 @@ class Stairstep::Promote
   end
 
   def from_commit
-    path = "/apps/#{from_app}/slugs/#{from_slug_id}"
-    slug_json = fetch_stdout(:heroku_api, "GET", path)
-    JSON.parse(slug_json)["commit"]
-  end
-
-  def from_slug_id
-    release_json = fetch_stdout(:heroku, from_remote, "releases:info", "--json")
-    JSON.parse(release_json)["slug"]["id"]
-  end
-
-  def from_app
-    "#{pipeline}-#{from_remote}"
-  end
-
-  def to_app
-    "#{pipeline}-#{to_remote}"
-  end
-
-  def promote_slug
-    scale_dynos do
-      with_maintenance do
-        heroku(from_remote, "pipelines:promote", "--to", to_app)
-      end
-    end
-  end
-
-  def scale_dynos
-    heroku(to_remote, "ps:scale", *(worker_dyno_counts(to_remote).collect { |type, _| "#{type}=0" }))
-    yield
-  ensure
-    heroku(to_remote, "ps:scale", *(worker_dyno_counts(to_remote).collect { |type, count| "#{type}=#{count}" }))
-  end
-
-  def worker_dyno_counts(remote)
-    @worker_dyno_counts ||= {}
-    @worker_dyno_counts[remote] ||=
-      begin
-        dyno_json = fetch_stdout(:heroku, remote, "ps", "--json")
-        web_dyno_defs = JSON.parse(dyno_json).reject { |dyno_def| %w[web scheduler run].include?(dyno_def["type"]) }
-
-        web_dyno_defs.inject(Hash.new(0)) do |dynos, dyno_def|
-          type = dyno_def["type"]
-          dynos.merge(type => dynos[type] + 1)
-        end
-      end
-  end
-
-  def with_maintenance
-    heroku(to_remote, "maintenance:on") if downtime?
-    yield
-  ensure
-    heroku(to_remote, "maintenance:off") if downtime?
+    heroku.slug_commit(pipeline, from_remote)
   end
 
   def save_tag
     git("push", "origin", tag_name)
   end
 
+  def promote_slug
+    with_tag do
+      heroku.scale_dynos(to_remote) do
+        heroku.with_maintenance(to_remote, downtime: downtime?) do
+          heroku.promote_slug(pipeline, from_remote, to_remote)
+        end
+      end
+    end
+  end
+
   def executor
     @executor ||= Stairstep::CommandExecutor.new
+  end
+
+  def heroku
+    @heroku ||= Stairstep::Common::Heroku.new(executor)
   end
 
   def info(message)

@@ -36,13 +36,5 @@ class Stairstep::CommandExecutor
   def git(*command, **options)
     execute!("git", *command, **options)
   end
-
-  def heroku(remote, *command, **options)
-    execute!("heroku", *command, "--remote", remote, **options)
-  end
-
-  def heroku_api(method, path, **options)
-    execute!("heroku", "api", method, path, **options)
-  end
 end
 
