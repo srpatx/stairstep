@@ -2,6 +2,7 @@
 
 require_relative "../stairstep"
 require_relative "../stairstep/command_executor"
+require_relative "../stairstep/logger"
 require_relative "../stairstep/common/git"
 require_relative "../stairstep/common/heroku"
 
@@ -17,7 +18,7 @@ class Stairstep::Promote
 
     promote_slug
 
-    info("Success!")
+    logger.info("Success!")
   end
 
   private
@@ -37,7 +38,7 @@ class Stairstep::Promote
   end
 
   def verify_remotes
-    error("Unknown remote to promote from") unless from_remote
+    logger.error("Unknown remote to promote from") unless from_remote
   end
 
   def from_remote
@@ -79,30 +80,15 @@ class Stairstep::Promote
   end
 
   def heroku
-    @heroku ||= Stairstep::Common::Heroku.new(executor)
+    @heroku ||= Stairstep::Common::Heroku.new(executor, logger)
   end
 
   def git
-    @git ||= Stairstep::Common::Git.new(executor)
+    @git ||= Stairstep::Common::Git.new(executor, logger)
   end
 
-  def info(message)
-    puts("\n", "=-" * 40)
-    puts(message.upcase)
-  end
-
-  def warning(message)
-    puts("\n", "?" * 80)
-    puts(message.upcase)
-  end
-
-  def error(message, exception: nil)
-    puts("\n", "!" * 80)
-    if exception
-      p(exception)
-      raise if debug?
-    end
-    abort(message.upcase)
+  def logger
+    @logger ||= Stairstep::Logger.new
   end
 
   def method_missing(method, *args, **kwargs)

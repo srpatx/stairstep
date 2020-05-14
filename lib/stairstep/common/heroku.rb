@@ -5,8 +5,9 @@ require_relative "../../stairstep"
 
 module Stairstep::Common
   class Heroku
-    def initialize(executor)
+    def initialize(executor, logger)
       @executor = executor
+      @logger = logger
     end
 
     def verify_pipeline(pipeline)
@@ -16,7 +17,7 @@ module Stairstep::Common
     def verify_application(remote)
       heroku(remote, "apps:info", output: nil)
     rescue
-      error("Cannot access Heroku application at remote '#{remote}'")
+      logger.error("Cannot access Heroku application at remote '#{remote}'")
     end
 
     def capture_db(remote)
@@ -72,7 +73,7 @@ module Stairstep::Common
 
     private
 
-    attr_reader :executor
+    attr_reader :executor, :logger
 
     def heroku(remote, *command, capture_stdout: false, **options)
       if capture_stdout

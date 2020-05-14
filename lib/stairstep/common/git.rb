@@ -5,8 +5,9 @@ require_relative "../../stairstep"
 
 module Stairstep::Common
   class Git
-    def initialize(executor)
+    def initialize(executor, logger)
       @executor = executor
+      @logger = logger
     end
 
     def project_name
@@ -24,7 +25,7 @@ module Stairstep::Common
 
     private
 
-    attr_reader :executor
+    attr_reader :executor, :logger
 
     def build_tag_name(remote)
       tag_name = base_tag_name = "deploy-#{remote}-#{Date.today}"
