@@ -32,9 +32,5 @@ class Stairstep::CommandExecutor
     io.rewind
     io.read
   end
-
-  def git(*command, **options)
-    execute!("git", *command, **options)
-  end
 end
 

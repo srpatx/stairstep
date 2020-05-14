@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
-require "date"
 require_relative "../stairstep"
 require_relative "../stairstep/command_executor"
+require_relative "../stairstep/common/git"
 require_relative "../stairstep/common/heroku"
 
-# rubocop:disable Metrics/ClassLength
 class Stairstep::Promote
   def run(to_remote, options)
     @to_remote = to_remote
@@ -34,7 +33,7 @@ class Stairstep::Promote
   end
 
   def pipeline
-    @pipeline ||= File.basename(fetch_stdout(:git, "rev-parse", "--show-toplevel")).rstrip
+    @pipeline ||= git.project_name
   end
 
   def verify_remotes
@@ -59,50 +58,13 @@ class Stairstep::Promote
     heroku.verify_application(to_remote)
   end
 
-  def with_tag
-    git("tag", "-a", "-m", "Deploy to #{to_remote} from #{from_remote} at #{Time.now}", tag_name, from_commit) if tag?
-    yield
-    save_tag if tag?
-  ensure
-    git("tag", "-d", tag_name) if tag?
-  end
-
-  def tag_name
-    @tag_name ||=
-      begin
-        tag_name = base_tag_name = "deploy-#{deploy_name}"
-        counter = 0
-        while existing_tags.include?(tag_name)
-          counter += 1
-          tag_name = "#{base_tag_name}.#{counter}"
-        end
-
-        tag_name
-      end
-  end
-
-  def existing_tags
-    @existing_tags ||=
-      begin
-        git("fetch", "--tags")
-        fetch_stdout(:git, "tag").split("\n")
-      end
-  end
-
-  def deploy_name
-    @deploy_name ||= "#{to_remote}-#{Date.today}"
-  end
-
   def from_commit
     heroku.slug_commit(pipeline, from_remote)
   end
 
-  def save_tag
-    git("push", "origin", tag_name)
-  end
-
+  # rubocop:disable Metrics/AbcSize
   def promote_slug
-    with_tag do
+    git.with_tag(from_remote, to_remote, from_commit, tag: tag?) do
       heroku.scale_dynos(to_remote) do
         heroku.with_maintenance(to_remote, downtime: downtime?) do
           heroku.promote_slug(pipeline, from_remote, to_remote)
@@ -110,6 +72,7 @@ class Stairstep::Promote
       end
     end
   end
+  # rubocop:enable Metrics/AbcSize
 
   def executor
     @executor ||= Stairstep::CommandExecutor.new
@@ -117,6 +80,10 @@ class Stairstep::Promote
 
   def heroku
     @heroku ||= Stairstep::Common::Heroku.new(executor)
+  end
+
+  def git
+    @git ||= Stairstep::Common::Git.new(executor)
   end
 
   def info(message)
@@ -153,5 +120,4 @@ class Stairstep::Promote
     super || instance_variable_names.include?(:"@#{match_data[1]}")
   end
 end
-# rubocop:enable Metrics/ClassLength
 
