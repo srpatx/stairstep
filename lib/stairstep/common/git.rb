@@ -23,6 +23,31 @@ module Stairstep::Common
       git("tag", "-d", tag_name) if tag
     end
 
+    def verify_clean_working_directory
+      if !git("diff", "--shortstat", capture_stdout: true).strip.empty?
+        logger.error(<<~ERROR)
+          Your working directory contains uncommitted files.
+
+          The deploy process may destroy your work.  Please commit and try again.
+        ERROR
+      end
+    end
+
+    def with_ref(remote, commit, &block)
+      ref_name = build_ref_name(remote)
+      git("update-ref", ref_name, commit, message: "Creating deploy ref (#{ref_name})")
+      checkout_ref(ref_name, &block)
+    ensure
+      git("update-ref", "-d", ref_name, message: "Cleaning up deploy ref")
+    end
+
+    def push(remote, ref_name, force: )
+      logger.info("Pushing to target environment #{remote}")
+      params = [remote, "#{ref_name}:master"]
+      params.unshift("--force") if force
+      git("push", *params)
+    end
+
     private
 
     attr_reader :executor, :logger
@@ -49,6 +74,17 @@ module Stairstep::Common
 
     def save_tag(tag_name)
       git("push", "origin", tag_name)
+    end
+
+    def checkout_ref(ref_name)
+      git("checkout", "--quiet", ref_name, message: "Checking out deploy ref")
+      yield(ref_name)
+    ensure
+      git("checkout", "-", "-f", "--quiet", message: "Restoring HEAD position")
+    end
+
+    def build_ref_name(remote)
+      "refs/deploys/#{deploy_name(remote)}"
     end
 
     def deploy_name(remote)

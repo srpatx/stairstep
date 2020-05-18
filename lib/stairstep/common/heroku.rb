@@ -71,6 +71,12 @@ module Stairstep::Common
       heroku(from_remote, "pipelines:promote", "--to", "#{pipeline}-#{to_remote}")
     end
 
+    def with_migrations(remote, downtime: )
+      yield
+      heroku(remote, "run", "rake", "db:migrate") if downtime
+      heroku(remote, "ps:restart")
+    end
+
     private
 
     attr_reader :executor, :logger
