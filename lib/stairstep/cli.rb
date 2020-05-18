@@ -21,7 +21,7 @@ class Stairstep::CLI < Thor
   method_option "--downtime", type: :boolean, default: true, desc: "Bring down the site during deploy (NB: Only skip this for deploys with no migrations)"
   method_option "--tag", type: :boolean, default: true, desc: "Create a tag for the commit"
   def promote(environment)
-    Stairstep::Promote.new.run(environment, options)
+    Stairstep::Promote.new(self, environment, options).run
   end
 end
 

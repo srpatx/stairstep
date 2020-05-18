@@ -14,9 +14,9 @@ module Stairstep::Common
       File.basename(git("rev-parse", "--show-toplevel", capture_stdout: true)).rstrip
     end
 
-    def with_tag(from_remote, to_remote, from_commit, tag: )
-      tag_name = build_tag_name(to_remote)
-      git("tag", "-a", "-m", "Deploy to #{to_remote} from #{from_remote} at #{Time.now}", tag_name, from_commit) if tag
+    def with_tag(to_remote, commit: , message: , tag: )
+      tag_name = build_tag_name(to_remote) if tag
+      git("tag", "-a", "-m", message, tag_name, commit) if tag
       yield
       save_tag(tag_name) if tag
     ensure
@@ -28,7 +28,7 @@ module Stairstep::Common
     attr_reader :executor, :logger
 
     def build_tag_name(remote)
-      tag_name = base_tag_name = "deploy-#{remote}-#{Date.today}"
+      tag_name = base_tag_name = "deploy-#{deploy_name(remote)}"
 
       counter = 0
       while existing_tags.include?(tag_name)
@@ -49,6 +49,10 @@ module Stairstep::Common
 
     def save_tag(tag_name)
       git("push", "origin", tag_name)
+    end
+
+    def deploy_name(remote)
+      "#{remote}-#{Date.today}"
     end
 
     def git(*command, capture_stdout: false, **options)

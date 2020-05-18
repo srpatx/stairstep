@@ -1,16 +1,9 @@
 # frozen_string_literal: true
 
-require_relative "../stairstep"
-require_relative "../stairstep/command_executor"
-require_relative "../stairstep/logger"
-require_relative "../stairstep/common/git"
-require_relative "../stairstep/common/heroku"
+require_relative "../stairstep/base"
 
-class Stairstep::Promote
-  def run(to_remote, options)
-    @to_remote = to_remote
-    process_options(options)
-
+class Stairstep::Promote < Stairstep::Base
+  def run
     heroku.verify_pipeline(pipeline)
     verify_remotes
     verify_applications
@@ -23,14 +16,9 @@ class Stairstep::Promote
 
   private
 
-  attr_reader :to_remote
-
   def process_options(options)
+    super
     @from_remote = options["from"]
-    @capture_db = options["db-capture"]
-    @downtime = options["downtime"]
-    @tag = options["tag"]
-    @debug = options["debug"]
   end
 
   def pipeline
@@ -65,7 +53,7 @@ class Stairstep::Promote
 
   # rubocop:disable Metrics/AbcSize
   def promote_slug
-    git.with_tag(from_remote, to_remote, from_commit, tag: tag?) do
+    git.with_tag(to_remote, commit: from_commit, message: "Deploy to #{to_remote} from #{from_remote} at #{Time.now}", tag: tag?) do
       heroku.scale_dynos(to_remote) do
         heroku.with_maintenance(to_remote, downtime: downtime?) do
           heroku.promote_slug(pipeline, from_remote, to_remote)
@@ -74,36 +62,5 @@ class Stairstep::Promote
     end
   end
   # rubocop:enable Metrics/AbcSize
-
-  def executor
-    @executor ||= Stairstep::CommandExecutor.new
-  end
-
-  def heroku
-    @heroku ||= Stairstep::Common::Heroku.new(executor, logger)
-  end
-
-  def git
-    @git ||= Stairstep::Common::Git.new(executor, logger)
-  end
-
-  def logger
-    @logger ||= Stairstep::Logger.new
-  end
-
-  def method_missing(method, *args, **kwargs)
-    if (match_data = method.to_s.match(/\A(\w+)\?\z/)) # => e.g. #capture_db?
-      instance_variable_get(:"@#{match_data[1]}")
-    elsif executor.respond_to?(method)
-      executor.public_send(method, *args, **kwargs)
-    else
-      super
-    end
-  end
-
-  def respond_to_missing?(method, *)
-    match_data = method.to_s.match(/\A(\w+)\?\z/)
-    super || instance_variable_names.include?(:"@#{match_data[1]}")
-  end
 end
 
