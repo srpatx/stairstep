@@ -94,6 +94,7 @@ class Stairstep::Deploy < Stairstep::Base
           end
         end
       end
+      heroku.after_deploy(to_remote)
     end
   end
 

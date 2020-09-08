@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "json"
+require "yaml"
 require_relative "../../stairstep"
 
 module Stairstep::Common
@@ -77,9 +78,22 @@ module Stairstep::Common
       heroku(remote, "ps:restart")
     end
 
+    def after_deploy(remote)
+      heroku(remote, "run", config["after_deploy"]) if config["after_deploy"]
+    end
+
     private
 
     attr_reader :executor, :logger
+
+    def config
+      @config ||=
+        if File.exist?("config/stairstep.yml")
+          YAML.load_file("config/stairstep.yml")
+        else
+          {}
+        end
+    end
 
     def heroku(remote, *command, capture_stdout: false, **options)
       if capture_stdout
