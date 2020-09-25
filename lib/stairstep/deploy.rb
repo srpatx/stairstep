@@ -87,14 +87,9 @@ class Stairstep::Deploy < Stairstep::Base
   def push_commit(ref_name)
     git.with_tag(to_remote, commit: ref_name, message: "Deploy to #{to_remote} at #{Time.now}", tag: tag?) do
       verify_force if force?
-      heroku.scale_dynos(to_remote) do
-        heroku.with_maintenance(to_remote, downtime: downtime?) do
-          heroku.with_migrations(to_remote, downtime: downtime?) do
-            git.push(to_remote, ref_name, force: force?)
-          end
-        end
+      heroku.manage_deploy(to_remote, downtime: downtime?) do
+        git.push(to_remote, ref_name, force: force?)
       end
-      heroku.after_deploy(to_remote)
     end
   end
 

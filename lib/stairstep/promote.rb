@@ -51,16 +51,12 @@ class Stairstep::Promote < Stairstep::Base
     heroku.slug_commit(pipeline, from_remote)
   end
 
-  # rubocop:disable Metrics/AbcSize
   def promote_slug
     git.with_tag(to_remote, commit: from_commit, message: "Deploy to #{to_remote} from #{from_remote} at #{Time.now}", tag: tag?) do
-      heroku.scale_dynos(to_remote) do
-        heroku.with_maintenance(to_remote, downtime: downtime?) do
-          heroku.promote_slug(pipeline, from_remote, to_remote)
-        end
+      heroku.manage_deploy(to_remote, downtime: downtime?) do
+        heroku.promote_slug(pipeline, from_remote, to_remote)
       end
     end
   end
-  # rubocop:enable Metrics/AbcSize
 end
 

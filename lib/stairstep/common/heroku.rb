@@ -83,6 +83,17 @@ module Stairstep::Common
       heroku(remote, "run", config["after_deploy"]) if config["after_deploy"]
     end
 
+    def manage_deploy(to_remote, **kwargs)
+      scale_dynos(to_remote) do
+        with_maintenance(to_remote, **kwargs) do
+          with_migrations(to_remote, **kwargs) do
+            yield
+          end
+        end
+      end
+      after_deploy(to_remote)
+    end
+
     private
 
     attr_reader :executor, :logger
