@@ -5,7 +5,7 @@ require "stringio"
 require_relative "../stairstep"
 
 class Stairstep::CommandExecutor
-  def execute(*command, message: nil, output: STDOUT, progress: false, stdout_only: false)
+  def execute(*command, message: nil, output: $stdout, progress: false, stdout_only: false)
     print("*** ")
     puts(message || command.join(" "))
 

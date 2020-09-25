@@ -8,6 +8,5 @@ gemspec
 
 group :development do
   gem "groundwork-style", require: false, github: "buildgroundwork/groundwork-style"
-  gem "rubocop", require: false, github: "buildgroundwork/rubocop"
 end
 

@@ -52,7 +52,8 @@ module Stairstep::Common
       @worker_dyno_counts[remote] ||=
         begin
           dyno_json = heroku(remote, "ps", "--json", capture_stdout: true)
-          web_dyno_defs = JSON.parse(dyno_json).reject { |dyno_def| %w[web scheduler run].include?(dyno_def["type"]) }
+          dyno_types = %w[web scheduler run]
+          web_dyno_defs = JSON.parse(dyno_json).reject { |dyno_def| dyno_types.include?(dyno_def["type"]) }
 
           web_dyno_defs.inject(Hash.new(0)) do |dynos, dyno_def|
             type = dyno_def["type"]
