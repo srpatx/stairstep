@@ -117,7 +117,7 @@ module Stairstep::Common
     end
 
     def run_callbacks(remote, phase)
-      config[phase]&.each do |type, *commands|
+      config[phase]&.each do |type, commands|
         commands.each do |command|
           heroku(remote, type, command)
         end
