@@ -79,19 +79,16 @@ module Stairstep::Common
       heroku(remote, "ps:restart")
     end
 
-    def after_deploy(remote)
-      heroku(remote, "run", config["after_deploy"]) if config["after_deploy"]
-    end
-
     def manage_deploy(to_remote, **kwargs)
       scale_dynos(to_remote) do
         with_maintenance(to_remote, **kwargs) do
           with_migrations(to_remote, **kwargs) do
+            run_callbacks(to_remote, "before_deploy")
             yield
           end
         end
       end
-      after_deploy(to_remote)
+      run_callbacks(to_remote, "after_deploy")
     end
 
     private
@@ -117,6 +114,14 @@ module Stairstep::Common
 
     def heroku_api(method, path, **options)
       executor.fetch_stdout(:execute!, "heroku", "api", method, path, **options)
+    end
+
+    def run_callbacks(remote, phase)
+      config[phase]&.each do |type, *commands|
+        commands.each do |command|
+          heroku(remote, type, command)
+        end
+      end
     end
   end
 end
