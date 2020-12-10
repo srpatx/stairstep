@@ -24,11 +24,16 @@ module Stairstep::Common
     end
 
     def verify_clean_working_directory
-      if !git("diff", "--shortstat", capture_stdout: true).strip.empty?
+      diff = git("diff", "--shortstat", capture_stdout: true).strip
+
+      if !diff.empty?
         logger.error(<<~ERROR)
           Your working directory contains uncommitted files.
 
           The deploy process may destroy your work.  Please commit and try again.
+
+          Output:
+          #{diff}
         ERROR
       end
     end
