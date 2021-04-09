@@ -75,7 +75,7 @@ module Stairstep::Common
 
     def with_migrations(remote, downtime: )
       yield
-      heroku(remote, "run", "-x", "rake", "db:migrate") if downtime
+      heroku(remote, "run", "-x", "rake", "db:prepare") if downtime
       heroku(remote, "ps:restart")
     end
 
