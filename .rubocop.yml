@@ -10,6 +10,9 @@ AllCops:
   Exclude:
     - bin/**/*
 
+Metrics/AbcSize:
+  Enabled: false
+
 Metrics/ClassLength:
   Enabled: false
 

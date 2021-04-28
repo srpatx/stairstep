@@ -22,6 +22,7 @@ class Stairstep::Base
     @downtime = options["downtime"]
     @tag = options["tag"]
     @debug = options["debug"]
+    @initial_deploy = options["initial-deploy"]
   end
 
   def executor

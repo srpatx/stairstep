@@ -47,11 +47,11 @@ module Stairstep::Common
       JSON.parse(release_json)["slug"]["id"]
     end
 
-    def scale_dynos(remote)
-      heroku(remote, "ps:scale", *(worker_dyno_counts(remote).collect { |type, _| "#{type}=0" }))
+    def scale_dynos(remote, initial_deploy: )
+      heroku(remote, "ps:scale", *(worker_dyno_counts(remote).collect { |type, _| "#{type}=0" })) unless initial_deploy
       yield
     ensure
-      heroku(remote, "ps:scale", *(worker_dyno_counts(remote).collect { |type, count| "#{type}=#{count}" }))
+      heroku(remote, "ps:scale", *(worker_dyno_counts(remote).collect { |type, count| "#{type}=#{count}" })) unless initial_deploy
     end
 
     def worker_dyno_counts(remote)
@@ -86,10 +86,10 @@ module Stairstep::Common
       heroku(remote, "ps:restart")
     end
 
-    def manage_deploy(to_remote, **kwargs)
-      scale_dynos(to_remote) do
-        with_maintenance(to_remote, **kwargs) do
-          with_migrations(to_remote, **kwargs) do
+    def manage_deploy(to_remote, downtime: , initial_deploy: )
+      scale_dynos(to_remote, initial_deploy: initial_deploy) do
+        with_maintenance(to_remote, downtime: downtime) do
+          with_migrations(to_remote, downtime: downtime) do
             run_callbacks(to_remote, "before_deploy")
             yield
           end

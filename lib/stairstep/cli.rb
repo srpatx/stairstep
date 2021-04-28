@@ -39,6 +39,8 @@ class Stairstep::CLI < Thor
   method_option "--bundle-package", type: :boolean, default: false, desc: "Create a commit for packaged gems"
   method_option "--tag", type: :boolean, default: true, desc: "Create a tag for the commit"
   method_option "--development", type: :boolean, desc: "Combine --no-assets-precompile, --no-bundle-package, and --no-tag"
+  method_option "--initial-deploy", type: :boolean, default: false, desc: "This is an initial deploy, so do not try to scale dynos"
+
   def deploy(environment)
     Stairstep::Deploy.new(self, environment, options).run
   end
@@ -58,6 +60,8 @@ class Stairstep::CLI < Thor
   method_option "--db-capture", type: :boolean, desc: "Capture a snapshot of the database before deploying"
   method_option "--downtime", type: :boolean, default: true, desc: "Bring down the site during deploy (NB: Only skip this for deploys with no migrations)"
   method_option "--tag", type: :boolean, default: true, desc: "Create a tag for the commit"
+  method_option "--initial-deploy", type: :boolean, default: false, desc: "This is an initial deploy, so do not try to scale dynos"
+
   def promote(environment)
     Stairstep::Promote.new(self, environment, options).run
   end

@@ -4,7 +4,6 @@ require_relative "../stairstep/base"
 require_relative "../stairstep/command_executor"
 require_relative "../stairstep/common/bundler"
 
-# rubocop:disable Metrics/AbcSize
 class Stairstep::Deploy < Stairstep::Base
   def run
     heroku.verify_application(to_remote)
@@ -87,7 +86,7 @@ class Stairstep::Deploy < Stairstep::Base
   def push_commit(ref_name)
     git.with_tag(to_remote, commit: ref_name, message: "Deploy to #{to_remote} at #{Time.now}", tag: tag?) do
       verify_force if force?
-      heroku.manage_deploy(to_remote, downtime: downtime?) do
+      heroku.manage_deploy(to_remote, downtime: downtime?, initial_deploy: initial_deploy?) do
         git.push(to_remote, ref_name, force: force?)
       end
     end
@@ -106,5 +105,4 @@ class Stairstep::Deploy < Stairstep::Base
     @bundler ||= Stairstep::Common::Bundler.new(executor, logger)
   end
 end
-# rubocop:enable Metrics/AbcSize
 
