@@ -8,10 +8,14 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 ## Configuration
 
-Add a `config/stairstep.yml` file to the application. Each key within a hook is
-a Heroku CLI command. Each value is an array of invocations for that command.
+You may add an optional `stairstep.yml` file in the application's config directory.
+
+### Pipeline name
+You may optionally specify the name of the pipeline for deploys (see example).  This will default to the name of the GitHub repository.
 
 ### Hooks
+Top level config keys may be the name of a Heroku deploy hook. Each key within a hook is a Heroku CLI command. Each value is an array of parameters for that command.
+
 - `before_deploy` Runs right before the deploy (during maintenance mode)
 - `after_deploy` Runs at the very end (after maintenance mode)
 
@@ -19,6 +23,8 @@ a Heroku CLI command. Each value is an array of invocations for that command.
 
 ```yaml
 ---
+pipeline: wibble-wobble
+
 before_deploy:
   config:unset:
     - MINOR_VERSION
