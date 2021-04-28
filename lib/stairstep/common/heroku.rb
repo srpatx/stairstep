@@ -11,6 +11,10 @@ module Stairstep::Common
       @logger = logger
     end
 
+    def pipeline
+      config["pipeline"]
+    end
+
     def verify_pipeline(pipeline)
       executor.execute!("heroku", "pipelines:info", pipeline, output: nil)
     end

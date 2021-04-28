@@ -22,7 +22,7 @@ class Stairstep::Promote < Stairstep::Base
   end
 
   def pipeline
-    @pipeline ||= git.project_name
+    @pipeline ||= heroku.pipeline || git.project_name
   end
 
   def verify_remotes
