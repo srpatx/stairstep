@@ -32,9 +32,12 @@ module Stairstep::Common
       raise
     end
 
+    def app_name(pipeline, remote)
+      config[remote]&.fetch("app", nil) || "#{pipeline}-#{remote}"
+    end
+
     def slug_commit(pipeline, remote)
-      app_name = "#{pipeline}-#{remote}"
-      path = "/apps/#{app_name}/slugs/#{slug_id(remote)}"
+      path = "/apps/#{app_name(pipeline, remote)}/slugs/#{slug_id(remote)}"
       slug_json = heroku_api("GET", path)
       JSON.parse(slug_json)["commit"]
     end
@@ -74,7 +77,7 @@ module Stairstep::Common
     end
 
     def promote_slug(pipeline, from_remote, to_remote)
-      heroku(from_remote, "pipelines:promote", "--to", "#{pipeline}-#{to_remote}")
+      heroku(from_remote, "pipelines:promote", "--to", app_name(pipeline, to_remote))
     end
 
     def with_migrations(remote, downtime: )

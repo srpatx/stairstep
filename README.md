@@ -13,6 +13,9 @@ You may add an optional `stairstep.yml` file in the application's config directo
 ### Pipeline name
 You may optionally specify the name of the pipeline for deploys (see example).  This will default to the name of the GitHub repository.
 
+### App names
+You may optionally specify app names per remote (see example).  This will default to the hyphenated combination of the pipeline name and the remote name (e.g. syrup-demo).
+
 ### Hooks
 Top level config keys may be the name of a Heroku deploy hook. Each key within a hook is a Heroku CLI command. Each value is an array of parameters for that command.
 
@@ -25,6 +28,10 @@ Top level config keys may be the name of a Heroku deploy hook. Each key within a
 ---
 pipeline: wibble-wobble
 
+demo:
+  app: wib-wob-demo
+production:
+  app: wibble-wobble-prod
 before_deploy:
   config:unset:
     - MINOR_VERSION
