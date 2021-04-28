@@ -12,7 +12,7 @@ module Stairstep::Common
     end
 
     def verify_pipeline(pipeline)
-      executor.execute("heroku", "pipelines:info", pipeline, output: nil)
+      executor.execute!("heroku", "pipelines:info", pipeline, output: nil)
     end
 
     def verify_application(remote)
