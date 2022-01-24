@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require_relative "lib/stairstep/version"
 
 Gem::Specification.new do |spec|
@@ -11,13 +9,14 @@ Gem::Specification.new do |spec|
   spec.summary       = "Organization and manage deployment"
   spec.homepage      = "https://github.com/strongholdresourcepartners/stairstep"
   spec.license       = "MIT"
-  spec.required_ruby_version = Gem::Requirement.new(">= 2.7.0")
+  spec.required_ruby_version = Gem::Requirement.new(">= 3.1.0")
 
   spec.metadata["allowed_push_host"] = "TODO: Set to 'http://mygemserver.com'"
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/strongholdresourcepartners/stairstep"
   spec.metadata["changelog_uri"] = "https://github.com/strongholdresourcepartners/stairstep/releases"
+  spec.metadata["rubygems_mfa_required"] = "true"
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
@@ -32,6 +31,5 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency("rake")
   spec.add_development_dependency("rspec")
-  spec.metadata["rubygems_mfa_required"] = "true"
 end
 

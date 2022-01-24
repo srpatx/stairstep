@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require_relative "../stairstep/base"
 
 class Stairstep::Promote < Stairstep::Base

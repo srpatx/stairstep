@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require_relative "../stairstep"
 require_relative "../stairstep/command_executor"
 require_relative "../stairstep/logger"

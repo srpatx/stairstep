@@ -1,12 +1,11 @@
 inherit_gem:
-  groundwork-style:
+  srp-style:
     - rubocop.yml
     - rubocop_performance.yml
     - rubocop_rake.yml
     - rubocop_rspec.yml
 
 AllCops:
-  TargetRubyVersion: 2.7
   Exclude:
     - bin/**/*
 

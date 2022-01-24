@@ -1,11 +1,9 @@
-# frozen_string_literal: true
-
 # $LOAD_PATH << File.expand_path(__dir__, "..", "lib")
 
 require "bundler/setup"
 require "stairstep"
 
-Dir[Pathname.new(__dir__).join("support", "**", "*.rb")].sort.each { |f| require f }
+Dir[Pathname.new(__dir__).join("support", "**", "*.rb")].each { |f| require f }
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

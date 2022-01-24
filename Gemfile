@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 source "https://rubygems.org"
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
@@ -7,6 +5,6 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 gemspec
 
 group :development do
-  gem "groundwork-style", require: false, github: "buildgroundwork/groundwork-style"
+  gem "srp-style", require: false, github: "srpatx/srp-style"
 end
 
