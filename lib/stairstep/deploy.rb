@@ -103,4 +103,3 @@ class Stairstep::Deploy < Stairstep::Base
     @bundler ||= Stairstep::Common::Bundler.new(executor, logger)
   end
 end
-

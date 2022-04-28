@@ -31,4 +31,3 @@ module Stairstep::Common
     end
   end
 end
-

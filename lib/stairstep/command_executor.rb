@@ -31,4 +31,3 @@ class Stairstep::CommandExecutor
     io.read
   end
 end
-

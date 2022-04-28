@@ -52,4 +52,3 @@ class Stairstep::Base
     super || instance_variable_names.include?(:"@#{match_data[1]}")
   end
 end
-

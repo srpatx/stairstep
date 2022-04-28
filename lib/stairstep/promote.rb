@@ -57,4 +57,3 @@ class Stairstep::Promote < Stairstep::Base
     end
   end
 end
-

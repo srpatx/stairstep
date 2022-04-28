@@ -16,4 +16,3 @@ RSpec.configure do |config|
     c.syntax = %i[should expect]
   end
 end
-

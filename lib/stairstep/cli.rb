@@ -64,4 +64,3 @@ class Stairstep::CLI < Thor
     Stairstep::Promote.new(self, environment, options).run
   end
 end
-

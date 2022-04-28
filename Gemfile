@@ -7,4 +7,3 @@ gemspec
 group :development do
   gem "srp-style", require: false, github: "srpatx/srp-style"
 end
-

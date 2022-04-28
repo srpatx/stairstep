@@ -20,4 +20,3 @@ class Stairstep::Logger
     abort(message.upcase)
   end
 end
-
