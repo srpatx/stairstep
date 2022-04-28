@@ -1,6 +1,7 @@
 require_relative "../stairstep/base"
 require_relative "../stairstep/command_executor"
 require_relative "../stairstep/common/bundler"
+require "fileutils"
 
 class Stairstep::Deploy < Stairstep::Base
   def run
@@ -49,26 +50,8 @@ class Stairstep::Deploy < Stairstep::Base
   end
 
   def precompile(ref_name)
-    executor.execute!(precompile_env_vars, "bundle", "exec", "rake", "webpacker:clobber", message: "Cleaning outdated assets")
-    File.open("log/assets-precompile.log", "w+") do |file|
-      executor.execute!(precompile_env_vars, "bundle", "exec", "rake", "webpacker:compile", message: "Precompiling assets (log: #{file.path})", output: file, progress: true)
-      executor.execute!("git", "add", "-f", "public/packs")
-      executor.execute!("git", "commit", "-m", "Precompile assets", message: "git commit -m'Precompile assets'", output: file)
-    end
-
-    executor.execute!("git", "update-ref", ref_name, "head", ref_name)
-  end
-
-  def precompile_env_vars
-    {
-      "RAILS_ENV" => "production",
-      "NODE_ENV" => "production",
-      # The webpack compile will fail if S3 credentials and bucket name are not
-      # set.  They don't need to be real, they just have to be set.
-      "AWS_ACCESS_KEY_ID" => "foo",
-      "AWS_SECRET_ACCESS_KEY" => "bar",
-      "S3_BUCKET_NAME" => "wibble"
-    }
+    executor.execute!({ "RAILS_ENV" => "production" }, "bundle", "exec", "rake", "assets:precompile", message: "Precompiling assets")
+    executor.execute!({ "RAILS_ENV" => "production" }, "bundle", "exec", "rake", "assets:clean", message: "Cleaning outdated assets")
   end
 
   def bundle(ref_name)
@@ -85,7 +68,12 @@ class Stairstep::Deploy < Stairstep::Base
     git.with_tag(to_remote, commit: ref_name, message: "Deploy to #{to_remote} at #{Time.now}", tag: tag?) do
       verify_force if force?
       heroku.manage_deploy(to_remote, downtime: downtime?, initial_deploy: initial_deploy?) do
-        git.push(to_remote, ref_name, force: force?)
+        if precompile?
+          FileUtils.rm_rf("node_modules")
+          heroku.create_build(to_remote)
+        else
+          git.push(to_remote, ref_name, force: force?)
+        end
       end
     end
   end

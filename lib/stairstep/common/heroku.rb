@@ -96,6 +96,10 @@ module Stairstep::Common
       run_callbacks(to_remote, "after_deploy")
     end
 
+    def create_build(to_remote)
+      heroku(to_remote, "builds:create")
+    end
+
     private
 
     attr_reader :executor, :logger
