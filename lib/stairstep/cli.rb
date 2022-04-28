@@ -36,7 +36,7 @@ class Stairstep::CLI < Thor
   method_option "--assets-precompile", type: :boolean, default: false, desc: "Create a commit for precompiled assets"
   method_option "--bundle-package", type: :boolean, default: false, desc: "Create a commit for packaged gems"
   method_option "--tag", type: :boolean, default: true, desc: "Create a tag for the commit"
-  method_option "--development", type: :boolean, desc: "Combine --no-assets-precompile, --no-bundle-package, and --no-tag"
+  method_option "--development", type: :boolean, desc: "Combine --no-bundle-package and --no-tag"
   method_option "--initial-deploy", type: :boolean, default: false, desc: "This is an initial deploy, so do not try to scale dynos"
 
   def deploy(environment)

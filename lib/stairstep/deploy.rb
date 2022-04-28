@@ -29,7 +29,6 @@ class Stairstep::Deploy < Stairstep::Base
     @bundle = options["bundle-package"]
 
     if options["development"]
-      @precompile = false
       @bundle = false
       @tag = false
     end
