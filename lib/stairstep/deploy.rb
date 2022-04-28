@@ -69,6 +69,7 @@ class Stairstep::Deploy < Stairstep::Base
       heroku.manage_deploy(to_remote, downtime: downtime?, initial_deploy: initial_deploy?) do
         if precompile?
           FileUtils.rm_rf("node_modules")
+          FileUtils.rm_rf(".bundle")
           heroku.create_build(to_remote)
         else
           git.push(to_remote, ref_name, force: force?)
