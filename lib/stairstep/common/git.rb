@@ -12,13 +12,17 @@ module Stairstep::Common
       File.basename(git("rev-parse", "--show-toplevel", capture_stdout: true)).rstrip
     end
 
+    def commit_sha(ref_name)
+      git("rev-parse", "--verify", ref_name, capture_stdout: true).chomp
+    end
+
     def with_tag(to_remote, commit: , message: , tag: )
       tag_name = build_tag_name(to_remote) if tag
       git("tag", "-a", "-m", message, tag_name, commit) if tag
       yield
       save_tag(tag_name) if tag
     ensure
-      git("tag", "-d", tag_name) if tag
+      delete_tag(tag_name) if tag
     end
 
     def verify_clean_working_directory
@@ -77,6 +81,12 @@ module Stairstep::Common
 
     def save_tag(tag_name)
       git("push", "origin", tag_name)
+    end
+
+    def delete_tag(tag_name)
+      git("tag", "-d", tag_name)
+    rescue
+      warn("Failed to delete tag #{tag_name}, continuing...")
     end
 
     def checkout_ref(ref_name)

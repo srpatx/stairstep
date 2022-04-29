@@ -44,11 +44,11 @@ class Stairstep::Deploy < Stairstep::Base
 
   def prepare_commit(ref_name)
     logger.info("Preparing commit")
-    precompile(ref_name) if precompile?
+    precompile if precompile?
     bundle(ref_name) if bundle?
   end
 
-  def precompile(ref_name)
+  def precompile
     executor.execute!({ "RAILS_ENV" => "production" }, "bundle", "exec", "rake", "assets:precompile", message: "Precompiling assets")
     executor.execute!({ "RAILS_ENV" => "production" }, "bundle", "exec", "rake", "assets:clean", message: "Cleaning outdated assets")
   end
@@ -70,7 +70,7 @@ class Stairstep::Deploy < Stairstep::Base
         if precompile?
           FileUtils.rm_rf("node_modules")
           FileUtils.rm_rf(".bundle")
-          heroku.create_build(to_remote)
+          heroku.create_build(to_remote, git.commit_sha(ref_name))
         else
           git.push(to_remote, ref_name, force: force?)
         end

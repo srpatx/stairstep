@@ -37,12 +37,12 @@ module Stairstep::Common
     def slug_commit(pipeline, remote)
       path = "/apps/#{app_name(pipeline, remote)}/slugs/#{slug_id(remote)}"
       slug_json = heroku_api("GET", path)
-      JSON.parse(slug_json)["commit"]
+      JSON.parse(slug_json).fetch("commit")
     end
 
     def slug_id(remote)
       release_json = heroku(remote, "releases:info", "--json", capture_stdout: true)
-      JSON.parse(release_json)["slug"]["id"]
+      JSON.parse(release_json).dig("slug", "id") || fail
     end
 
     def scale_dynos(remote, initial_deploy: )
@@ -96,8 +96,8 @@ module Stairstep::Common
       run_callbacks(to_remote, "after_deploy")
     end
 
-    def create_build(to_remote)
-      heroku(to_remote, "builds:create")
+    def create_build(to_remote, version)
+      heroku(to_remote, "builds:create", "--version", version)
     end
 
     private
