@@ -60,15 +60,21 @@ module Stairstep::Common
     attr_reader :executor, :logger
 
     def build_tag_name(remote)
-      tag_name = base_tag_name = "deploy-#{deploy_name(remote)}"
+      base_tag_name = base_tag_name(remote)
 
       counter = 0
+      tag_name = base_tag_name
+
       while existing_tags.include?(tag_name)
         counter += 1
         tag_name = "#{base_tag_name}.#{counter}"
       end
 
       tag_name
+    end
+
+    def base_tag_name(remote)
+      ["deploy", config["tag_prefix"], deploy_name(remote)].compact.join("-")
     end
 
     def existing_tags
@@ -110,6 +116,15 @@ module Stairstep::Common
       else
         executor.execute!("git", *command, **options)
       end
+    end
+
+    def config
+      @config ||=
+        if File.exist?("config/stairstep.yml")
+          YAML.load_file("config/stairstep.yml")
+        else
+          {}
+        end
     end
   end
 end
