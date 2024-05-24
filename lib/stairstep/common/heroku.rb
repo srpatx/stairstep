@@ -1,5 +1,6 @@
 require "json"
 require "yaml"
+require "timeout"
 require_relative "../../stairstep"
 
 module Stairstep::Common
@@ -50,6 +51,7 @@ module Stairstep::Common
       yield
     ensure
       heroku(remote, "ps:scale", *(worker_dyno_counts(remote).collect { |type, count| "#{type}=#{count}" })) unless initial_deploy
+      Timeout.timeout(300) { heroku(remote, "ps:wait") }
     end
 
     def worker_dyno_counts(remote)
