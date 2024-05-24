@@ -45,7 +45,7 @@ module Stairstep::Common
       JSON.parse(release_json).dig("slug", "id") || fail
     end
 
-    def scale_dynos(remote, initial_deploy: )
+    def scale_dynos(remote, initial_deploy:)
       heroku(remote, "ps:scale", *(worker_dyno_counts(remote).collect { |type, _| "#{type}=0" })) unless initial_deploy
       yield
     ensure
@@ -67,7 +67,7 @@ module Stairstep::Common
         end
     end
 
-    def with_maintenance(remote, downtime: )
+    def with_maintenance(remote, downtime:)
       heroku(remote, "maintenance:on") if downtime
       yield
     ensure
@@ -78,13 +78,13 @@ module Stairstep::Common
       heroku(from_remote, "pipelines:promote", "--to", app_name(pipeline, to_remote))
     end
 
-    def with_migrations(remote, downtime: )
+    def with_migrations(remote, downtime:)
       yield
       heroku(remote, "run", "-x", "rake", "db:prepare") if downtime
       heroku(remote, "ps:restart")
     end
 
-    def manage_deploy(to_remote, downtime: , initial_deploy: )
+    def manage_deploy(to_remote, downtime:, initial_deploy:)
       scale_dynos(to_remote, initial_deploy: initial_deploy) do
         with_maintenance(to_remote, downtime: downtime) do
           with_migrations(to_remote, downtime: downtime) do
@@ -113,16 +113,16 @@ module Stairstep::Common
         end
     end
 
-    def heroku(remote, *command, capture_stdout: false, **options)
+    def heroku(remote, *command, capture_stdout: false, **)
       if capture_stdout
-        executor.fetch_stdout(:execute!, "heroku", *command, "--remote", remote, **options)
+        executor.fetch_stdout(:execute!, "heroku", *command, "--remote", remote, **)
       else
-        executor.execute!("heroku", *command, "--remote", remote, **options)
+        executor.execute!("heroku", *command, "--remote", remote, **)
       end
     end
 
-    def heroku_api(method, path, **options)
-      executor.fetch_stdout(:execute!, "heroku", "api", method, path, **options)
+    def heroku_api(method, path, **)
+      executor.fetch_stdout(:execute!, "heroku", "api", method, path, **)
     end
 
     def run_callbacks(remote, phase)

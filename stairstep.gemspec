@@ -1,15 +1,15 @@
 require_relative "lib/stairstep/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "stairstep"
-  spec.version       = Stairstep::VERSION
-  spec.authors       = ["SRP Developers"]
-  spec.email         = ["developers@srp-ok.com"]
+  spec.name = "stairstep"
+  spec.version = Stairstep::VERSION
+  spec.authors = ["SRP Developers"]
+  spec.email = ["developers@srp-ok.com"]
 
-  spec.summary       = "Organization and manage deployment"
-  spec.homepage      = "https://github.com/strongholdresourcepartners/stairstep"
-  spec.license       = "MIT"
-  spec.required_ruby_version = Gem::Requirement.new(">= 3.1.0")
+  spec.summary = "Deploy a Rails application to Heroku"
+  spec.homepage = "https://github.com/strongholdresourcepartners/stairstep"
+  spec.license = "MIT"
+  spec.required_ruby_version = Gem::Requirement.new(">= 3.2.0")
 
   spec.metadata["allowed_push_host"] = "TODO: Set to 'http://mygemserver.com'"
 
@@ -31,4 +31,5 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency("rake")
   spec.add_development_dependency("rspec")
+  spec.add_development_dependency("standard")
 end

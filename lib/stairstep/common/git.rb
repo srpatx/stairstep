@@ -16,7 +16,7 @@ module Stairstep::Common
       git("rev-parse", "--verify", ref_name, capture_stdout: true).chomp
     end
 
-    def with_tag(to_remote, commit: , message: , tag: )
+    def with_tag(to_remote, commit:, message:, tag:)
       tag_name = build_tag_name(to_remote) if tag
       git("tag", "-a", "-m", message, tag_name, commit) if tag
       yield
@@ -40,15 +40,15 @@ module Stairstep::Common
       end
     end
 
-    def with_ref(remote, commit, &block)
+    def with_ref(remote, commit, &)
       ref_name = build_ref_name(remote)
       git("update-ref", ref_name, commit, message: "Creating deploy ref (#{ref_name})")
-      checkout_ref(ref_name, &block)
+      checkout_ref(ref_name, &)
     ensure
       git("update-ref", "-d", ref_name, message: "Cleaning up deploy ref")
     end
 
-    def push(remote, ref_name, force: )
+    def push(remote, ref_name, force:)
       logger.info("Pushing to target environment #{remote}")
       params = [remote, "#{ref_name}:master"]
       params.unshift("--force") if force
@@ -110,11 +110,11 @@ module Stairstep::Common
       "#{remote}-#{Date.today}"
     end
 
-    def git(*command, capture_stdout: false, **options)
+    def git(*command, capture_stdout: false, **)
       if capture_stdout
-        executor.fetch_stdout(:execute!, "git", *command, **options)
+        executor.fetch_stdout(:execute!, "git", *command, **)
       else
-        executor.execute!("git", *command, **options)
+        executor.execute!("git", *command, **)
       end
     end
 

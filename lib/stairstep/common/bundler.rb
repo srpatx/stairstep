@@ -18,16 +18,16 @@ module Stairstep::Common
 
     attr_reader :executor, :logger
 
-    def execute(*command, capture_stdout: false, **options)
+    def execute(*command, capture_stdout: false, **)
       if capture_stdout
-        executor.fetch_stdout(:execute!, "bundle", *command, **options)
+        executor.fetch_stdout(:execute!, "bundle", *command, **)
       else
-        executor.execute("bundle", *command, **options)
+        executor.execute("bundle", *command, **)
       end
     end
 
-    def execute!(*command, **options)
-      executor.execute!("bundle", *command, **options)
+    def execute!(*command, **)
+      executor.execute!("bundle", *command, **)
     end
   end
 end

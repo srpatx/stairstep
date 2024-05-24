@@ -20,8 +20,8 @@ class Stairstep::CommandExecutor
     end
   end
 
-  def execute!(*command, **options)
-    raise "Command failed: `#{command.join(' ')}`" unless execute(*command, **options)
+  def execute!(*command, **)
+    raise "Command failed: `#{command.join(" ")}`" unless execute(*command, **)
   end
 
   def fetch_stdout(exec, *command, **options)

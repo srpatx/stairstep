@@ -49,8 +49,8 @@ class Stairstep::Deploy < Stairstep::Base
   end
 
   def precompile
-    executor.execute!({ "RAILS_ENV" => "production" }, "bundle", "exec", "rake", "assets:precompile", message: "Precompiling assets")
-    executor.execute!({ "RAILS_ENV" => "production" }, "bundle", "exec", "rake", "assets:clean", message: "Cleaning outdated assets")
+    executor.execute!({"RAILS_ENV" => "production"}, "bundle", "exec", "rake", "assets:precompile", message: "Precompiling assets")
+    executor.execute!({"RAILS_ENV" => "production"}, "bundle", "exec", "rake", "assets:clean", message: "Cleaning outdated assets")
   end
 
   def bundle(ref_name)
