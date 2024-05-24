@@ -25,7 +25,7 @@ module Stairstep::Common
 
     def capture_db(remote)
       heroku(remote, "pg:backups", "capture")
-    rescue Exception # rubocop:disable Lint/RescueException
+    rescue Exception # standard:disable Lint/RescueException
       heroku(remote, "pg:backups", "cancel")
       raise
     end

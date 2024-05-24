@@ -31,14 +31,12 @@ class Stairstep::Promote < Stairstep::Base
     @from_remote ||= calculate_from_remote
   end
 
-  # rubocop:disable Style/MissingElse
   def calculate_from_remote
     case to_remote
     when "production" then "staging"
     when "staging" then "demo"
     end
   end
-  # rubocop:enable Style/MissingElse
 
   def verify_applications
     heroku.verify_application(from_remote)
