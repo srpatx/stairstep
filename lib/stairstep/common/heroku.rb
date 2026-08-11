@@ -47,10 +47,10 @@ module Stairstep::Common
     end
 
     def scale_dynos(remote, initial_deploy:)
-      heroku(remote, "ps:scale", *(worker_dyno_counts(remote).collect { |type, _| "#{type}=0" })) unless initial_deploy
+      heroku(remote, "ps:scale", *worker_dyno_counts(remote).collect { |type, _| "#{type}=0" }) unless initial_deploy
       yield
     ensure
-      heroku(remote, "ps:scale", *(worker_dyno_counts(remote).collect { |type, count| "#{type}=#{count}" })) unless initial_deploy
+      heroku(remote, "ps:scale", *worker_dyno_counts(remote).collect { |type, count| "#{type}=#{count}" }) unless initial_deploy
       Timeout.timeout(300) { heroku(remote, "ps:wait") }
     end
 
