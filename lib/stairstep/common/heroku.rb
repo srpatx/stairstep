@@ -46,6 +46,18 @@ module Stairstep::Common
       JSON.parse(release_json).dig("slug", "id") || fail
     end
 
+    # True when the two remotes are running the same slug binary, compared by the
+    # slug's content checksum (not its git commit — one commit can back several
+    # rebuilt slugs). Used to decide whether a deploy-tag collision is benign.
+    def same_slug?(pipeline, from_remote, to_remote)
+      slug_checksum(pipeline, from_remote) == slug_checksum(pipeline, to_remote)
+    end
+
+    def slug_checksum(pipeline, remote)
+      path = "/apps/#{app_name(pipeline, remote)}/slugs/#{slug_id(remote)}"
+      JSON.parse(heroku_api("GET", path)).fetch("checksum")
+    end
+
     def scale_dynos(remote, initial_deploy:)
       heroku(remote, "ps:scale", *worker_dyno_counts(remote).collect { |type, _| "#{type}=0" }) unless initial_deploy
       yield

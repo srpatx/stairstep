@@ -48,7 +48,15 @@ class Stairstep::Promote < Stairstep::Base
   end
 
   def promote_slug
-    git.with_tag(to_remote, commit: from_commit, message: "Deploy to #{to_remote} from #{from_remote} at #{Time.now}", tag: tag?) do
+    git.with_tag(
+      to_remote,
+      commit: from_commit,
+      message: "Deploy to #{to_remote} from #{from_remote} at #{Time.now}",
+      tag: tag?,
+      # Only consulted if the tag push loses a race: is prod running the slug we
+      # just promoted? A same-name / different-slug collision then fails loudly.
+      verify_deploy: -> { heroku.same_slug?(pipeline, from_remote, to_remote) }
+    ) do
       heroku.manage_deploy(to_remote, downtime: downtime?, initial_deploy: initial_deploy?) do
         heroku.promote_slug(pipeline, from_remote, to_remote)
       end
